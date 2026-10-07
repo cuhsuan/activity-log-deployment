@@ -10,6 +10,7 @@ jobs:
   release-notes-agent:
     name: Generate AI Release Notes
     runs-on: ubuntu-latest
+    environment: ai-agent
 
     steps:
       - name: Checkout repository
