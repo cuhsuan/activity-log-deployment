@@ -10,7 +10,6 @@ jobs:
   release-notes-agent:
     name: Generate AI Release Notes
     runs-on: ubuntu-latest
-    environment: production
 
     steps:
       - name: Checkout repository
@@ -55,6 +54,7 @@ jobs:
           import json
           import os
           import urllib.request
+          import urllib.error
 
           with open("prompt.txt", encoding="utf-8") as f:
               instructions = f.read()
@@ -77,18 +77,35 @@ jobs:
               method="POST"
           )
 
-          with urllib.request.urlopen(request) as response:
-              result = json.load(response)
-
-          notes = result["output"][0]["content"][0]["text"]
+          try:
+              with urllib.request.urlopen(request) as response:
+                  result = json.load(response)
+          
+              notes = result["output"][0]["content"][0]["text"]
+              agent_status = "SUCCESS"
+          
+          except urllib.error.HTTPError as e:
+              error_body = e.read().decode("utf-8", errors="replace")
+          
+              print(f"AI API request failed with HTTP {e.code}")
+              print(error_body)
+          
+              notes = (
+                  "AI release-note generation could not be completed.\n\n"
+                  f"API error: HTTP {e.code}.\n\n"
+                  "The collected commit messages are preserved below for human review:\n\n"
+                  + commits
+              )
+              agent_status = "FALLBACK"
 
           with open("release-notes.md", "w", encoding="utf-8") as f:
-              f.write("# AI-Generated Release Notes\n\n")
+              f.write("# Release Notes Agent Report\n\n")
+              f.write(f"**Agent Status:** {agent_status}\n\n")
               f.write(notes)
               f.write("\n\n---\n")
               f.write("Human review required before Production deployment.\n")
-
-          print("AI release notes generated successfully.")
+          
+          print(f"Release Notes Agent Status: {agent_status}")
           print(notes)
           PY
 
