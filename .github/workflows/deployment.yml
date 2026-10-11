@@ -147,7 +147,7 @@ jobs:
   
         - name: Generate release notes with AI
           env:
-            OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+            GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           run: |
             python - <<'PY'
             import json
@@ -161,26 +161,39 @@ jobs:
             with open("commits.txt", encoding="utf-8") as f:
                 commits = f.read()
   
+            
             data = json.dumps({
-                "model": "gpt-5-mini",
-                "input": instructions + "\n\nGit commits:\n" + commits
-            }).encode()
-  
+                "contents": [
+                    {
+                        "role": "user",
+                        "parts": [
+                            {
+                                "text": instructions + "\n\nGit commits:\n" + commits
+                            }
+                        ]
+                    }
+                ],
+                "generationConfig": {
+                    "temperature": 0.2
+                }
+            }).encode("utf-8")
+            
             request = urllib.request.Request(
-                "https://api.openai.com/v1/responses",
+                "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent",
                 data=data,
                 headers={
-                    "Authorization": "Bearer " + os.environ["OPENAI_API_KEY"],
+                    "x-goog-api-key": os.environ["GEMINI_API_KEY"],
                     "Content-Type": "application/json"
                 },
                 method="POST"
             )
+
   
             try:
                 with urllib.request.urlopen(request) as response:
                     result = json.load(response)
   
-                notes = result["output"][0]["content"][0]["text"]
+                notes = result["candidates"][0]["content"]["parts"][0]["text"]
                 agent_status = "SUCCESS"
   
             except urllib.error.HTTPError as e:
