@@ -192,22 +192,22 @@ jobs:
             
             import time
             try:
-            for attempt in range(3):
-                try:
-                    with urllib.request.urlopen(request, timeout=90) as response:
-                        result = json.load(response)
-                    break
-                except urllib.error.HTTPError as e:
-                    if e.code in (429, 500, 502, 503, 504) and attempt < 2:
-                        wait = 10 * (2 ** attempt)
-                        print(f"Gemini HTTP {e.code}; retrying in {wait}s...")
-                        time.sleep(wait)
-                    else:
-                        raise
-
+              for attempt in range(3):
+                  try:
+                      with urllib.request.urlopen(request, timeout=90) as response:
+                          result = json.load(response)
+                      break
+                  except urllib.error.HTTPError as e:
+                      if e.code in (429, 500, 502, 503, 504) and attempt < 2:
+                          wait = 10 * (2 ** attempt)
+                          print(f"Gemini HTTP {e.code}; retrying in {wait}s...")
+                          time.sleep(wait)
+                      else:
+                          raise
   
-                notes = result["candidates"][0]["content"]["parts"][0]["text"]
-                agent_status = "SUCCESS"
+    
+                  notes = result["candidates"][0]["content"]["parts"][0]["text"]
+                  agent_status = "SUCCESS"
   
             except urllib.error.HTTPError as e:
                 print(f"AI API request failed with HTTP {e.code}")
