@@ -198,6 +198,7 @@ jobs:
   
             except urllib.error.HTTPError as e:
                 print(f"AI API request failed with HTTP {e.code}")
+                print("Gemini API error details:", e.read().decode("utf-8", errors="replace"))
   
                 notes = (
                     "AI release-note generation could not be completed.\n\n"
