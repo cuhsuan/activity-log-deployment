@@ -191,6 +191,7 @@ jobs:
   
             
             import time
+            agent_status = "FALLBACK"
             try:
               for attempt in range(3):
                   try:
