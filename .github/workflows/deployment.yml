@@ -191,7 +191,7 @@ jobs:
   
             
             import time
-            
+            try:
             for attempt in range(3):
                 try:
                     with urllib.request.urlopen(request, timeout=90) as response:
