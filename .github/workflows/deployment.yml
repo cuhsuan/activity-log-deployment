@@ -192,6 +192,7 @@ jobs:
             
             import time
             agent_status = "FALLBACK"
+            notes = "Gemini API unavailable. Human review required."
             try:
               for attempt in range(3):
                   try:
